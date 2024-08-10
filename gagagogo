@@ -1,1 +1,568 @@
+local library = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/idkwoody/real/main/real"))()
 
+local Main = library:CreateWindow("gaagaagoogoo","Crimson")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local tab = Main:CreateTab("auto")
+local tab2 = Main:CreateTab("other")
+local tab3 = Main:CreateTab("teleport")
+
+
+local MovingShot = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local StandingShot = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local CloseLayup = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local Layup = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local DrivingDunk = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local StandingDunk = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+
+local ReverseLayup = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local Floater = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local CloseHook = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local Hook = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local PostFade = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local CloseFloater = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+local SideHook = Instance.new('BoolValue', game.Players.LocalPlayer.Character)
+
+getgenv().AutoTimeEnabled = false
+getgenv().Delays = {
+    MovingShotDelay = 0.012,
+    StandingShotDelay = 0.012,
+    CloseLayupDelay = 0.012,
+    LayupDelay = 0.012,
+    HookDelay = 0.012, 
+    FloaterDelay = 0.012, 
+    SideHookDelay = 0.012,  
+    CloseFloaterDelay = 0.012,  
+    PostFadeDelay = 0.012, 
+    ReverseLayupDelay = 0.012, 
+    CloseHookDelay = 0.012
+}
+
+getgenv().AutoDunkEnabled = false
+getgenv().PassedNumber = 0
+getgenv().AutoDunkSettings = {
+    DrivingDunkDelay = 0.015,
+    StandingDunkDelay = 0.015
+}
+
+
+tab:CreateToggle("auto", function(aimbot)
+    getgenv().AutoTimeEnabled = aimbot
+end)
+
+tab:CreateToggle("autodunk", function(dunkAimbot)
+    getgenv().AutoDunkEnabled = dunkAimbot
+end)
+
+tab:CreateSlider("StandingShot", 1, 250, function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.StandingShotDelay = a / 1000
+end)
+
+
+tab:CreateSlider("MovingShot",1,250,function(a)
+   if not getgenv().Delays then
+    getgenv().Delays = {}
+end
+getgenv().Delays.MovingShotDelay = a / 1000
+end)
+
+tab:CreateSlider("CloseLayup",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.CloseLayupDelay = a / 1000
+end)
+
+tab:CreateSlider("Layup",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.LayupDelay = a / 1000
+end)
+
+tab:CreateSlider("DrivingDunk",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.DrivingDunkDelay = a / 1000
+end)
+
+tab:CreateSlider("StandingDunk",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.StandingDunkDelay = a / 1000
+end)
+
+tab:CreateSlider("ReverseLayup",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.ReverseLayupDelay = a / 1000
+end)
+
+tab:CreateSlider("Floater",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.FloaterDelay = a / 1000
+end)
+
+tab:CreateSlider("CloseFloater",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.CloseFloaterDelay = a / 1000
+end)
+
+tab:CreateSlider("Hook",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.HookDelay = a / 1000
+end)
+
+tab:CreateSlider("CloseHook",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.CloseHookDelay = a / 1000
+end)
+
+tab:CreateSlider("SideHook",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.SideHookDelay = a / 1000
+end)
+
+tab:CreateSlider("PostFade",1,250,function(a)
+    if not getgenv().Delays then
+        getgenv().Delays = {}
+    end
+    getgenv().Delays.PostFadeDelay = a / 1000
+end)
+
+
+tab:CreateDropdown("MeterType", {"Overhead", "On Floor", "Off", "Vertical Bar"}, function(shotTYPE)
+    local args = {
+        "Change Settings Request",
+        "ShotmeterType",
+        shotTYPE
+    }
+
+    local menuRE = game:GetService("ReplicatedStorage").Remotes:FindFirstChild("Menu.RE")
+    if menuRE then
+        menuRE:FireServer(unpack(args))
+        print(shotTYPE, "clicked")
+    else
+        warn("Menu.RE not found")
+    end
+end)
+MovingShot:GetPropertyChangedSignal("Value"):Connect(function()
+    if getgenv().AutoTimeEnabled then
+        if MovingShot.Value == true then
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().Delays.MovingShotDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Moving Shot"
+            }
+
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            MovingShot.Value = false
+        end
+    else
+        MovingShot.Value = false
+    end
+end)
+
+StandingShot:GetPropertyChangedSignal("Value"):Connect(function()
+    if getgenv().AutoTimeEnabled then
+        if StandingShot.Value == true then
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+            task.wait(getgenv().Delays.StandingShotDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Standing Shot"
+            }
+
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            StandingShot.Value = false
+        end
+    else
+        StandingShot.Value = false
+    end
+end)
+
+Layup:GetPropertyChangedSignal("Value"):Connect(function()
+    if getgenv().AutoTimeEnabled then
+        if Layup.Value == true then
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+            task.wait(getgenv().Delays.LayupDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Layup"
+            }
+
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            Layup.Value = false
+        end
+    else
+        Layup.Value = false
+    end
+end)
+
+CloseLayup:GetPropertyChangedSignal("Value"):Connect(function()
+    if getgenv().AutoTimeEnabled then
+        if CloseLayup.Value == true then
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+            task.wait(getgenv().Delays.CloseLayupDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Close Layup"
+            }
+
+           game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            CloseLayup.Value = false
+        end
+    else
+        CloseLayup.Value = false
+    end
+end)
+
+DrivingDunk:GetPropertyChangedSignal("Value"):Connect(function()
+    if getgenv().AutoDunkEnabled then
+        if DrivingDunk.Value == true then
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().AutoDunkSettings.DrivingDunkDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Moving Dunk",
+                [3] = getgenv().PassedNumber
+            }
+
+       game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            DrivingDunk.Value = false
+        end
+    else
+        DrivingDunk.Value = false
+    end
+end)
+
+StandingDunk:GetPropertyChangedSignal("Value"):Connect(function()
+    if getgenv().AutoDunkEnabled then
+        if StandingDunk.Value == true then
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().AutoDunkSettings.StandingDunkDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Standing Dunk",
+                [3] = getgenv().PassedNumber
+            }
+
+           game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            StandingDunk.Value = false
+        end
+    else
+        StandingDunk.Value = false
+    end
+end)
+
+Hook:GetPropertyChangedSignal("Value"):Connect(function() 
+    if getgenv().AutoTimeEnabled then 
+        if Hook.Value == true then 
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().Delays.HookDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Post Hook"
+            }
+
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            Hook.Value = false
+        end 
+    else 
+        Hook.Value = false
+    end 
+end)
+
+SideHook:GetPropertyChangedSignal("Value"):Connect(function() 
+    if getgenv().AutoTimeEnabled then 
+        if SideHook.Value == true then 
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 22
+
+            task.wait(getgenv().Delays.SideHookDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Side Post Hook",
+                [4] = getgenv().Side
+            }
+    
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            SideHook.Value = false
+        end 
+    else 
+        SideHook.Value = false
+    end 
+end)
+
+CloseHook:GetPropertyChangedSignal("Value"):Connect(function() 
+    if getgenv().AutoTimeEnabled then 
+        if CloseHook.Value == true then 
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().Delays.CloseHookDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Close Post Hook"
+            }
+    
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            CloseHook.Value = false
+        end 
+    else 
+        CloseHook.Value = false
+    end 
+end)
+
+Floater:GetPropertyChangedSignal("Value"):Connect(function() 
+    if getgenv().AutoTimeEnabled then 
+        if Floater.Value == true then 
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().Delays.FloaterDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Floater"
+            }
+
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            Floater.Value = false
+        end 
+    else 
+        Floater.Value = false
+    end 
+end)
+
+CloseFloater:GetPropertyChangedSignal("Value"):Connect(function() 
+    if getgenv().AutoTimeEnabled then 
+        if CloseFloater.Value == true then 
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().Delays.CloseFloaterDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Close Floater"
+            }
+game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            CloseFloater.Value = false
+        end 
+    else 
+        CloseFloater.Value = false
+    end 
+end)
+
+ReverseLayup:GetPropertyChangedSignal("Value"):Connect(function() 
+    if getgenv().AutoTimeEnabled then 
+        if ReverseLayup.Value == true then 
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().Delays.ReverseLayupDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Reverse Layup"
+            }
+
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            ReverseLayup.Value = false
+        end 
+    else 
+        ReverseLayup.Value = false
+    end 
+end)
+
+
+PostFade:GetPropertyChangedSignal("Value"):Connect(function() 
+    if getgenv().AutoTimeEnabled then 
+        if PostFade.Value == true then 
+            repeat
+                task.wait()
+            until game.Players.LocalPlayer.Backpack.ActionValues.Power.Value >= 54
+
+            task.wait(getgenv().Delays.PostFadeDelay)
+
+            local args = {
+                [1] = false,
+                [2] = "Shooting",
+                [3] = "Post Fade"
+            }
+
+            game:GetService("ReplicatedStorage").PlayerEvents.Shooting:FireServer(unpack(args))
+
+            PostFade.Value = false
+        end 
+    else 
+        PostFade.Value = false
+    end 
+end)
+
+tab2:CreateToggle("hide mobile ui", function(mobile)
+    local Plrs = game:GetService("Players")
+    local MyPlr = Plrs.LocalPlayer
+    if MyPlr and MyPlr:FindFirstChild("PlayerGui") then
+        local TouchGui = MyPlr.PlayerGui:FindFirstChild("TouchGui")
+        if TouchGui and TouchGui:FindFirstChild("TouchControlFrame") then
+            TouchGui.TouchControlFrame.Visible = not mobile
+        end
+    end
+end)
+
+tab3:CreateButton("MyCourt",function()
+    local player = Players.LocalPlayer 
+    local placeId = 6678600773
+    TeleportService:Teleport(placeId, player)
+end)
+
+tab3:CreateButton("Plaza",function()
+    local player = Players.LocalPlayer 
+    local placeId = 13272886093
+    TeleportService:Teleport(placeId, player)
+end)
+
+tab3:CreateButton("Arcade",function()
+    local player = Players.LocalPlayer 
+    local placeId = 7235817949
+    TeleportService:Teleport(placeId, player)
+end)
+
+tab3:CreateButton("Park",function()
+    local player = Players.LocalPlayer 
+    local placeId = 8026790371
+    TeleportService:Teleport(placeId, player)
+end)
+
+
+local HookMt;
+HookMt = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+
+        local Args = {...}
+
+        if getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Moving Shot" and Args[1] == true then
+            MovingShot.Value = true
+            return HookMt(self, table.unpack(Args))
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Standing Shot" and Args[1] == true then
+            StandingShot.Value = true
+            return HookMt(self, table.unpack(Args))
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Close Layup" and Args[1] == true then
+            CloseLayup.Value = true
+            return HookMt(self, table.unpack(Args))
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Layup" and Args[1] == true then
+            Layup.Value = true
+            return HookMt(self, table.unpack(Args))
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[2] == "Standing Dunk" and Args[1] == true then
+            getgenv().PassedNumber = Args[3]
+            StandingDunk.Value = true
+            return HookMt(self, table.unpack(Args))
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[2] == "Moving Dunk" and Args[1] == true then
+            getgenv().PassedNumber = Args[3]
+            DrivingDunk.Value = true
+            return HookMt(self, table.unpack(Args))
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Post Hook" and Args[1] == true then
+            Hook.Value = true
+            return HookMt(self, table.unpack(Args))    
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Side Post Hook" and Args[1] == true then
+            getgenv().Side = Args[4]
+            SideHook.Value = true
+            return HookMt(self, table.unpack(Args))      
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Close Post Hook" and Args[1] == true then
+            CloseHook.Value = true
+            return HookMt(self, table.unpack(Args))      
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Close Post Hook" and Args[1] == true then
+            CloseHook.Value = true
+            return HookMt(self, table.unpack(Args))     
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Floater" and Args[1] == true then
+            Floater.Value = true
+            return HookMt(self, table.unpack(Args))  
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Close Floater" and Args[1] == true then
+            CloseFloater.Value = true
+            return HookMt(self, table.unpack(Args))       
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Reverse Layup" and Args[1] == true then
+            ReverseLayup.Value = true
+            return HookMt(self, table.unpack(Args))             
+        elseif getnamecallmethod() == "FireServer" and self.Name == "Shooting" and Args[3] == "Post Fade" and Args[1] == true then
+            PostFade.Value = true
+            return HookMt(self, table.unpack(Args))                                                                                               
+        end
+
+        return HookMt(self, table.unpack(Args))
+
+        end))
+
+
+tab:Show() 
